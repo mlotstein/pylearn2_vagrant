@@ -14,7 +14,14 @@ package { [
         "python-imaging",
         "python-matplotlib",
         "libopenblas-dev",
+        "liblapack-dev",
         "git",
+        "mongodb",
+        "python-networkx",
+        "python-protobuf",
+        "openjdk-7-jre-headless",
+        "python-psutil",
+        "vim"
     ]:
     ensure => latest,
 } ->
@@ -31,6 +38,15 @@ vcsrepo { "/home/vagrant/pylearn2":
 exec { 'install pylearn2':
   command   => '/usr/bin/python setup.py develop',
   cwd      => '/home/vagrant/pylearn2',
+} ->
+vcsrepo { "/home/vagrant/HPOlib":
+  ensure   => present,
+  provider => git,
+  source   => 'https://github.com/mblum/HPOlib.git',
+} ->
+exec { 'install HPOlib':
+  command   => '/usr/bin/python setup.py install',
+  cwd      => '/home/vagrant/HPOlib',
 } ->
 file { "/home/vagrant/data":
   ensure => "directory",
