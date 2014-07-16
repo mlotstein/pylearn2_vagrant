@@ -17,6 +17,11 @@ Vagrant.configure("2") do |config|
 
   config.vm.box_url = "https://vagrantcloud.com/ubuntu/trusty32"
 
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 2
+  end
+
   # config.vm.synced_folder "vm", "/home/vagrant"
 
   config.vm.provision :puppet do |puppet|
@@ -26,3 +31,4 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: $script
 
 end
+
