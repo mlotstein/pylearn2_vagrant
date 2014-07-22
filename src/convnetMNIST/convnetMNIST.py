@@ -3,7 +3,7 @@
 import theano
 print theano.config.device
 
-train = open('/home/vagrant/pylearn2/pylearn2/scripts/tutorials/convolutional_network/conv.yaml', 'r').read()
+train = open('./conv.yaml', 'r').read()
 train_params = {'train_stop': 50000,
                     'valid_stop': 60000,
                     'test_stop': 10000,
