@@ -86,3 +86,15 @@ s_no_affine bool [True, False] [False]
 s_max_col_norm float [0.1, 5] [1.9365]
 s_init_bias_target_marginals float [0,1] [0]
 binary_target_dim int [10] [10]
+
+algorithm = [SGD] [SGD] # For now, just SGD; later include variants and possibly BGD
+
+if algorithm == SGD
+	batch_size = 100
+	learning_rate = [.01,.5] [.01]
+	learning_rule = [None] [None] # Another thing to implement later, before perhaps variants, as this looks quite easy to do
+	
+	
+	
+termination_criterion = constant, see iPython
+monitoring_dataset = constant, see iPython
