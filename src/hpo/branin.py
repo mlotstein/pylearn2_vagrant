@@ -20,35 +20,152 @@
 import HPOlib.benchmark_util as benchmark_util
 import HPOlib.benchmark_functions as benchmark_functions
 
-# import for convnet
 import theano
 from pylearn2.config import yaml_parse
-print theano.config.device
+from pylearn2.datasets.mnist import MNIST
+from pylearn2.models.mlp import MLP
+from pylearn2.models.mlp import ConvRectifiedLinear
+from pylearn2.models.mlp import ConvElemWise
+from pylearn2.training_algorithms.sgd import SGD
+from pylearn2.training_algorihtms.learning_rule import Momemtum
+from pylearn2.training_algorihtms.learning_rule import AdaDelta
+from pylearn2.costs.cost import SumOfCosts
+from pylearn2.costs.cost import MethodCost
+from pylearn2.costs.mlp import WeightDecay
+from pylearn2.termination_criterion import And
+from pylearn2.termination_criterion import MonitorBased
+from pylearn2.termination_criterion import EpochCounter
+from pylearn2.train_extensions.best_params import MonitorBasedSaveBest
+from pylearn2.training_algorithms.learning_rule import MomemtumAdjustor
+
 
 import time
 
-__authors__ = ["Katharina Eggensperger", "Matthias Feurer"]
-__contact__ = "automl.org"
 
-
+def buildDataset(params, **kwargs):
+	"""
+	This function is responsible for building the MNIST dataset object. It accepts an integer which controls how large the training set is.
+	"""
+	d = MNIST(which_set='train', one_hot=1,start=0,stop=kwargs["training_set_size"])
+	return d
+	
+def buildModel(params, **kwargs):
+	"""
+	This function is responsible for building the model object. The input and output topology is fixed. 
+	-- Parameters --
+	batch_size: integer
+	remaining arguments are used by other functions.
+	"""
+	conv_2d_space = Conv2DSpace(shape = [28,28], num_channels = 1)
+	
+	m = MLP(batch_size=kwargs["mlp_batch_size"], input_space=conv_2d_space, layers = buildLayers(params, **kwargs))
+	return m
+	
+def buildLayers(params, **kwargs):
+	"""
+	This function is responsible for building a list of layer objects. 
+	"""
+	layers = []
+	for layer_num in range(1, kwargs["num_conv_layers"]):
+		if (kwargs[layer_num + "_conv_type"] == "ConvRectifiedLinear"):
+			new_layer = ConvRectifiedLinear(layer_name=kwargs[layer_num + "_layer_name"],
+											output_channels= kwargs[layer_num + "_output_channels"],
+											kernel_shape=[kwargs[layer_num + "_kernel_shape_1"], kwargs[layer_num + "_kernel_shape_2"],
+											pool_shape=[kwargs[layer_num + "_pool_shape"], kwargs[layer_num + "_pool_shape"],
+											irange=kwargs[layer_num + "_irange"],
+											border_mode='valid',
+											include_prob=kwargs[layer_num + "_include_prob"],
+											init_bias=kwargs[layer_num + "_init_bias"],
+											W_lr_scale=kwargs[layer_num + "_W_lr_scale"],
+											b_lr_scale=kwargs[layer_num + "_b_lr_scale"],
+											max_kernel_norm=kwargs[layer_num + "_max_kernel_norm"],
+											pool_type='max',
+											tied_b=kwargs[layer_num + "_tied_b"],
+											kernel_stride=[kwargs[layer_num + "_kernel_stride_1"], kwargs[layer_num + "_kernel_stride_2"],
+											monitor_style='classification')
+		elif (kwargs[layer_num + "_conv_type"] == "ConvElemWise"):
+						new_layer = ConvRectifiedLinear(layer_name=kwargs[layer_num + "_layer_name"],
+											output_channels= kwargs[layer_num + "_output_channels"],
+											kernel_shape=[kwargs[layer_num + "_kernel_shape_1"], kwargs[layer_num + "_kernel_shape_2"],
+											pool_shape=[kwargs[layer_num + "_pool_shape"], kwargs[layer_num + "_pool_shape"],
+											irange=kwargs[layer_num + "_irange"],
+											border_mode='valid',
+											include_prob=kwargs[layer_num + "_include_prob"],
+											init_bias=kwargs[layer_num + "_init_bias"],
+											W_lr_scale=kwargs[layer_num + "_W_lr_scale"],
+											b_lr_scale=kwargs[layer_num + "_b_lr_scale"],
+											max_kernel_norm=kwargs[layer_num + "_max_kernel_norm"],
+											pool_type='max',
+											tied_b=kwargs[layer_num + "_tied_b"],
+											kernel_stride=[kwargs[layer_num + "_kernel_stride_1"], kwargs[layer_num + "_kernel_stride_2"],
+											monitor_style='classification',
+											nonlinearity=kwargs[layer_num + "_nonlinearity"])
+		layers.append(new_layer)
+	return layers
+	
+def buildAlgorithm(params, **kwargs):
+	"""
+	This function is responsible for building an algorithm object. An algorithm consists of a few parameters, a monitoring dataset (which will be constant), a cost function (which for now will also be constant), and a termination_criterion (yet another constant).
+	"""
+	
+	m_dataset = {'valid' : MNIST {
+								  which_set: 'train',
+								  one_hot: 1,
+								  start: 50000,
+								  stop:  60000
+							  },
+					'test'  : !obj:pylearn2.datasets.mnist.MNIST {
+								  which_set: 'test',
+								  one_hot: 1,
+								  stop: 10000
+							  }
+				}
+	cost =  SumOfCosts { costs: [MethodCost {
+							method: 'cost_from_X'
+						}, WeightDecay {
+							coeffs: [ .00005, .00005, .00005 ]
+						}]
+	
+	termination_criterion = And {
+								criteria: [MonitorBased {
+									channel_name: "valid_y_misclass",
+									prop_decrease: 0.50,
+									N: 10
+								},
+								EpochCounter {
+									max_epochs: %(max_epochs)i
+								}]}
+	
+	algorithm = SGD(batch_size=kwargs["batch_size"],
+					learning_rate=kwargs["learning_rate"],
+					learning_rule=buildLearningRule(params, kwargs),
+					monitoring_dataset=m_dataset,
+					cost=cost,
+					termination_criterion=termination_criterion)
+	return algorithm				
+					
+def buildExtensions(params, **kwargs)
+	
+	extensions = []
+	extensions.append(MonitorBasedSaveBest {
+						channel_name: 'valid_y_misclass',
+						save_path: "./convolutional_network_best.pkl"
+					})
+	if (kwargs["learning_rule"] == "Momemtum"):
+		extensions.append(MomentumAdjustor {
+							start: 1,
+							saturate: 10,
+							final_momentum: .99
+        })
+    
+    return extensions	
+		
 def main(params, **kwargs):
-
-
-    train = open('/home/vagrant/pylearn2/pylearn2/scripts/tutorials/convolutional_network/conv.yaml', 'r').read()
-    train_params = {'train_stop': 100,
-                        'valid_stop': 50100,
-                        'test_stop': 500,
-                        'batch_size': 100,
-                        'output_channels_h2': 64,
-                        'output_channels_h3': 64,
-                        'max_epochs': 500,
-                        'save_path': '.'}
-    train = train % (train_params)
-    #print train
-    train = yaml_parse.load(train)
+	
+    train = Train(dataset=buildDataset(params, kwargs), model=buildModel(params, kwargs), algorithm=buildAlgorithm(params,kwargs),extensions=buildExtensions(params,kwargs))
     train.main_loop()
 
-    result = 0;
+    result = 0; # here we need to read the file from disk
     #print 'Params: ', params,
     #y = benchmark_functions.save_branin(params, **kwargs)
     #print 'Result: ', y

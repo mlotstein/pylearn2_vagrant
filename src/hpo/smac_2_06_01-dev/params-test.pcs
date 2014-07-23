@@ -1,3 +1,7 @@
+train_stop {50000} [50000]
+valid_stop {60000} [60000]
+test_stop {10000} [10000]
+
 mlp_batch_size {100} [100]
 num_conv_layers {1,3} [2] [i]
 
@@ -9,20 +13,17 @@ num_conv_layers {1,3} [2] [i]
 1_output_channels {2,128} [64]i
 1_kernel_shape_1 {1,10} [5]i
 1_kernel_shape_2 {1,10} [5]i
-1_pool_shape_1 {1,27} [2]i
+1_pool_shape {1,27} [2]i
 1_pool_stride {1,27} [2]i
 1_irange {.001,1} [.05]l
-1_border_mode {valid} [valid]
 1_include_prob {0,1} [0]l
 1_init_bias {0.0} [0.0]
 1_W_lr_scale {.001,1} [1]l
 1_b_lr_scale {.001,1} [1]l
 1_max_kernel_norm {.01,5} [1.9365]l
-1_pool_type {max} [max]
 1_tied_b {True, False} [False]
 1_kernel_stride_1 {1,37} [2]i
 1_kernel_stride_2 {1,37} [2]i
-1_monitor_style {classification} [classification]
 
 2_conv_type {ConvRectifiedLinear, ConvElemWise} [ConvRectifiedLinear]
 2_conv_type| num_conv_layers in {2,3}
@@ -33,20 +34,17 @@ num_conv_layers {1,3} [2] [i]
 2_output_channels {2,128} [64]i
 2_kernel_shape_1 {1,10} [5]i
 2_kernel_shape_2 {1,10} [5]i
-2_pool_shape_1 {1,27} [2]i
+2_pool_shape {1,27} [2]i
 2_pool_stride {1,27} [2]i
 2_irange {.001,1} [.05]l
-2_border_mode {valid} [valid]
 2_include_prob {0,1} [0]l
 2_init_bias {0.0} [0.0]
 2_W_lr_scale {.001,1} [1]l
 2_b_lr_scale {.001,1} [1]l
 2_max_kernel_norm {.01,5} [1.9365]l
-2_pool_type {max} [max]
 2_tied_b {True, False} [False]
 2_kernel_stride_1 {1,37} [2]i
 2_kernel_stride_2 {1,37} [2]i
-2_monitor_style {classification} [classification]
 
 3_conv_type {ConvRectifiedLinear, ConvElemWise} [ConvRectifiedLinear]
 3_conv_type| num_conv_layers in {3}
@@ -57,21 +55,17 @@ num_conv_layers {1,3} [2] [i]
 3_output_channels {2,128} [64]i
 3_kernel_shape_1 {1,10} [5]i
 3_kernel_shape_2 {1,10} [5]i
-3_pool_shape_1 {1,27} [2]i
+3_pool_shape {1,27} [2]i
 3_pool_stride {1,27} [2]i
 3_irange {.001,1} [.05]l
-3_border_mode {valid} [valid]
 3_include_prob {0,1} [0]l
 3_init_bias {0.0} [0.0]
 3_W_lr_scale {.001,1} [1]l
 3_b_lr_scale {.001,1} [1]l
 3_max_kernel_norm {.01,5} [1.9365]l
-3_pool_type {max} [max]
 3_tied_b {True, False} [False]
 3_kernel_stride_1 {1,37} [2]i
 3_kernel_stride_2 {1,37} [2]i
-3_monitor_style {classification} [classification]
-
 
 s_n_classes int {10} [10]
 s_layer_name str SoftMax
@@ -86,5 +80,12 @@ s_init_bias_target_marginals float [0,1] [0]
 binary_target_dim int {10} [10]
 
 algorithm {SGD} [SGD]
-batch_size {100} [100]
+
+learning_rule {AdaDelta, Momentum} [Momentum]
 learning_rate {.001, .5} [.01]
+init_momemtum {0, 1} [.5]
+init_momemtum | learning_rate {Momentum}
+decay {0,1} [.9499999]
+decay | learning_rate {AdaDelta}
+
+batch_size {100} [100]
