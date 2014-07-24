@@ -39,12 +39,14 @@ from pylearn2.train_extensions.best_params import MonitorBasedSaveBest
 from pylearn2.training_algorithms.learning_rule import MomemtumAdjustor
 
 import time
-def buildDataset(params, **kwargs):
+
+
+def buildDataset(training_set_size, params, **kwargs):
     """
     This function is responsible for building the MNIST dataset object. It accepts an integer which controls how large
     the training set is.
     """
-    d = MNIST(which_set='train', one_hot=1, start=0, stop=kwargs["training_set_size"])
+    d = MNIST(which_set='train', one_hot=1, start=0, stop=training_set_size)
     return d
 
 
@@ -67,7 +69,7 @@ def buildLayers(params, **kwargs):
     """
     layers = []
     for layer_num in range(1, kwargs["num_conv_layers"]):
-        if (kwargs[layer_num + "_conv_type"] == "ConvRectifiedLinear"):
+        if kwargs[layer_num + "_conv_type"] == "ConvRectifiedLinear":
             new_layer = ConvRectifiedLinear(layer_name=kwargs[layer_num + "_layer_name"],
                                             output_channels=kwargs[layer_num + "_output_channels"],
                                             kernel_shape=[kwargs[layer_num + "_kernel_shape_1"],
@@ -86,7 +88,7 @@ def buildLayers(params, **kwargs):
                                             kernel_stride=[kwargs[layer_num + "_kernel_stride_1"],
                                                            kwargs[layer_num + "_kernel_stride_2"]],
                                             monitor_style='classification')
-        elif (kwargs[layer_num + "_conv_type"] == "ConvElemWise"):
+        elif kwargs[layer_num + "_conv_type"] == "ConvElemWise":
             new_layer = ConvRectifiedLinear(layer_name=kwargs[layer_num + "_layer_name"],
                                             output_channels=kwargs[layer_num + "_output_channels"],
                                             kernel_shape=[kwargs[layer_num + "_kernel_shape_1"],
@@ -158,7 +160,7 @@ def buildExtensions(params, **kwargs):
     extensions.append(MonitorBasedSaveBest(
         channel_name='test_y_misclass',
         save_path="./convolutional_network_best.pkl"))
-    if (kwargs["learning_rule"] == "Momemtum"):
+    if kwargs["learning_rule"] == "Momemtum":
         extensions.append(MomentumAdjustor(
             start=1,
             saturate=10,
@@ -168,17 +170,18 @@ def buildExtensions(params, **kwargs):
 
 
 def main(params, **kwargs):
-    train = Train(dataset=buildDataset(params, kwargs),
-                  model=buildModel(params, kwargs),
-                  algorithm=buildAlgorithm(params, kwargs),
-                  extensions=buildExtensions(params, kwargs))
+    train = Train(dataset=buildDataset(params, **kwargs),
+                  model=buildModel(params, **kwargs),
+                  algorithm=buildAlgorithm(params, **kwargs),
+                  extensions=buildExtensions(params, **kwargs))
     train.main_loop()
 
     result = 0  # here we need to read the file from disk
-    #print 'Params: ', params,
+    # print 'Params: ', params,
     #y = benchmark_functions.save_branin(params, **kwargs)
     #print 'Result: ', y
     return y
+
 
 if __name__ == "__main__":
     starttime = time.time()
