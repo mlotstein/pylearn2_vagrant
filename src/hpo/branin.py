@@ -53,12 +53,12 @@ def main(params, **kwargs):
     train.main_loop()
     model = serial.load(os.path.join(d, f, 'best_model.pkl'))
     monitor = model.monitor
-	channels = monitor.channels
-	def read_channel(s):
-		return float(channels[s].val_record[-1])
+    channels = monitor.channels
+    def read_channel(s):
+	return float(channels[s].val_record[-1])
 	#print 'job#, orig valid, valid both, new test, old test'
-	v, t = map(read_channel, ['valid_y_misclass', 'test_y_misclass'])
-	return t
+    v, t = map(read_channel, ['valid_y_misclass', 'test_y_misclass'])
+    return t
 
 if __name__ == "__main__":
     starttime = time.time()
