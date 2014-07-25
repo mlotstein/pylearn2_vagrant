@@ -41,6 +41,7 @@ from pylearn2.termination_criteria import EpochCounter
 from pylearn2.train_extensions.best_params import MonitorBasedSaveBest
 from pylearn2.training_algorithms.learning_rule import MomentumAdjustor
 from pylearn2.train import Train
+from pylearn2.space import Conv2DSpace
 
 import time
 

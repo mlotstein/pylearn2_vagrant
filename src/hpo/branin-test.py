@@ -41,6 +41,7 @@ from pylearn2.termination_criteria import EpochCounter
 from pylearn2.train_extensions.best_params import MonitorBasedSaveBest
 from pylearn2.training_algorithms.learning_rule import MomentumAdjustor
 from pylearn2.train import Train
+from pylearn2.space import Conv2DSpace
 
 import time
 
@@ -50,7 +51,7 @@ def buildDataset():
     This function is responsible for building the MNIST dataset object. It accepts an integer which controls how large
     the training set is.
     """
-    d = MNIST(which_set='train', one_hot=1, start=0, stop=1000)
+    d = MNIST(which_set='train', one_hot=1, start=0, stop=50000)
     return d
 
 
@@ -63,7 +64,7 @@ def buildModel():
     """
     conv_2d_space = Conv2DSpace(shape=[28, 28], num_channels=1)
 
-    m = MLP(batch_size=kwargs["mlp_batch_size"], input_space=conv_2d_space, layers=buildLayers(params, **kwargs))
+    m = MLP(batch_size=100, input_space=conv_2d_space, layers=buildLayers())
     return m
 
 
@@ -78,35 +79,37 @@ def buildLayers():
 		    output_channels=8,
 		    kernel_shape=[4,4],
 		    pool_shape=[4,4],
+		    pool_stride=[2,2],
 		    irange=.05,
-		    border_mode='valid',
-		    include_prob=.05,
-		    init_bias=0,
-		    W_lr_scale=.5,
-		    b_lr_scale=.01,
-		    max_kernel_norm=1.9,
-		    pool_type='max',
-		    tied_b=0,
-		    kernel_stride=[2,2],
-		    monitor_style='classification')
+		    #border_mode='valid',
+		    #include_prob=.05,
+		    #init_bias=0,
+		    #W_lr_scale=.5,
+		    #b_lr_scale=.01,
+		    max_kernel_norm=1.9)
+		    #pool_type='max',
+		    #tied_b=0,
+		    #kernel_stride=[2,2])#,
+		    #monitor_style='classification')
     layers.append(new_layer_1)
         # elif kwargs[layer_num + "_conv_type"] == "ConvElemWise":
     new_layer_2 = ConvRectifiedLinear(layer_name='l2',
 		    output_channels=8,
 		    kernel_shape=[4,4],
 		    pool_shape=[4,4],
+		    pool_stride=[2,2],
 		    irange=.05,
-		    border_mode='valid',
-		    include_prob=.05,
-		    init_bias=0.0,
-		    W_lr_scale=.5,
-		    b_lr_scale=.01,
-		    max_kernel_norm=1.9,
-		    pool_type='max',
-		    tied_b=0,
-		    kernel_stride=[2,2],
-		    monitor_style='classification',
-		    nonlinearity=buildNonlinearity('Rect'))
+		    #border_mode='valid',
+		    #include_prob=.05,
+		    #init_bias=0,
+		    #W_lr_scale=.5,
+		    #b_lr_scale=.01,
+		    max_kernel_norm=1.9)
+		    #pool_type='max',
+		    #tied_b=0,
+		    #kernel_stride=[2,2])#,
+		    #monitor_style='classification')
+		    #nonlinearity=buildNonlinearity('Sigmoid'))
     layers.append(new_layer_2)
     return layers
 
@@ -142,24 +145,26 @@ def buildAlgorithm():
         coeffs=[.00005, .00005, .00005]
     )])
 
-    terminatia_criteria = And(
+    termination_criteria = And(
         criteria=[MonitorBased(
             channel_name="valid_y_misclass",
             prop_decrease=0.50,
             N=10
         ),
                   EpochCounter(
-                      max_epochs=kwargs["max_epochs"]
+                      max_epochs=100
                   )])
 
     algorithm = SGD(batch_size=100,
                     learning_rate=.05,
-                    learning_rule=buildLearningRule(params, **kwargs),
+                    learning_rule=buildLearningRule(),
                     monitoring_dataset=m_dataset,
                     cost=cost,
-                    termination_criteria=termination_criteria)
+                    termination_criterion=termination_criteria)
     return algorithm
 
+def buildLearningRule():
+    return Momentum(init_momentum=.05)
 
 def buildExtensions():
     extensions = []
