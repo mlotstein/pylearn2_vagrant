@@ -1,7 +1,0 @@
-ToDos
-
-Python:
-	- Capture error (ideally, without saving to disk)
-	- Write logic for parameters so that invalid parameters can be detected before the training is initiated
-		- Write exceptions for clearer error handling
-	-
