@@ -22,4 +22,4 @@ max_kernel_norm_2 [.01,5.0] [1.9365]
 istdev float [.01, 1.0] [.05]
 max_col_norm float [.01,5.0] [1.9365]
 
-algorithm {SGD} [SGD]
+#algorithm {SGD} [SGD]
