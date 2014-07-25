@@ -1,0 +1,25 @@
+train_stop {50000} [50000]
+valid_stop {60000} [60000]
+test_stop {10000} [10000]
+
+batch_size {100} [100]
+
+output_channels {2,128} [64]l
+kernel_shape {1,10} [5]i
+pool_shape {1,27} [2]i
+pool_stride {1,27} [2]i
+irange {.001,1} [.05]l
+max_kernel_norm {.01,5} [1.9365]l
+
+output_channels_2 {2,128} [64]i
+kernel_shape_2 {1,10} [5]i
+pool_shape_2 {1,27} [2]i
+pool_stride_2 {1,27} [2]i
+irange_2 {.001,1} [.05]l
+max_kernel_norm_2 {.01,5} [1.9365]l
+
+# currently ignoring this param
+istdev float {.01, 1} [.05]l
+max_col_norm float {.01,5} [1.9365]l
+
+algorithm {SGD} [SGD]
