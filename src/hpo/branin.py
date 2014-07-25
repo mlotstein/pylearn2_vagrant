@@ -26,6 +26,9 @@ from pylearn2.datasets.mnist import MNIST
 from pylearn2.models.mlp import MLP
 from pylearn2.models.mlp import ConvRectifiedLinear
 from pylearn2.models.mlp import ConvElemwise
+from pylearn2.models.mlp import RectifierConvNonlinearity
+from pylearn2.models.mlp import SigmoidConvNonlinearity
+from pylearn2.models.mlp import TanhConvNonlinearity
 from pylearn2.training_algorithms.sgd import SGD
 from pylearn2.training_algorithms.learning_rule import Momentum
 from pylearn2.training_algorithms.learning_rule import AdaDelta
@@ -108,10 +111,17 @@ def buildLayers(params, **kwargs):
                                             kernel_stride=[kwargs[layer_num + "_kernel_stride_1"],
                                                            kwargs[layer_num + "_kernel_stride_2"]],
                                             monitor_style='classification',
-                                            nonlinearity=kwargs[layer_num + "_nonlinearity"])
+                                            nonlinearity=buildNonlinearity(kwargs[layer_num + "_nonlinearity"]))
         layers.append(new_layer)
     return layers
-
+	
+def buildNonlinearity(nonlinearity):
+	if nonlinearity == 'Rect':
+		return RectifierConvNonlinearity()
+	elif nonlinearity == 'Sigmoid':
+		return SigmoidConvNonlinearity()
+	elif nonlinearity == 'Tanh':
+		return TanhConvNonlinearity()
 
 def buildAlgorithm(params, **kwargs):
     """

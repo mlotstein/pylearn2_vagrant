@@ -26,6 +26,9 @@ from pylearn2.datasets.mnist import MNIST
 from pylearn2.models.mlp import MLP
 from pylearn2.models.mlp import ConvRectifiedLinear
 from pylearn2.models.mlp import ConvElemwise
+from pylearn2.models.mlp import RectifierConvNonlinearity
+from pylearn2.models.mlp import SigmoidConvNonlinearity
+from pylearn2.models.mlp import TanhConvNonlinearity
 from pylearn2.training_algorithms.sgd import SGD
 from pylearn2.training_algorithms.learning_rule import Momentum
 from pylearn2.training_algorithms.learning_rule import AdaDelta
@@ -42,16 +45,16 @@ from pylearn2.train import Train
 import time
 
 
-def buildDataset(training_set_size, params, **kwargs):
+def buildDataset():
     """
     This function is responsible for building the MNIST dataset object. It accepts an integer which controls how large
     the training set is.
     """
-    d = MNIST(which_set='train', one_hot=1, start=0, stop=training_set_size)
+    d = MNIST(which_set='train', one_hot=1, start=0, stop=1000)
     return d
 
 
-def buildModel(params, **kwargs):
+def buildModel():
     """
     This function is responsible for building the model object. The input and output topology is fixed.
     -- Parameters --
@@ -64,56 +67,58 @@ def buildModel(params, **kwargs):
     return m
 
 
-def buildLayers(params, **kwargs):
+def buildLayers():
     """
     This function is responsible for building a list of layer objects.
     """
     layers = []
-    for layer_num in range(1, kwargs["num_conv_layers"]):
-        if kwargs[layer_num + "_conv_type"] == "ConvRectifiedLinear":
-            new_layer = ConvRectifiedLinear(layer_name=kwargs[layer_num + "_layer_name"],
-                                            output_channels=kwargs[layer_num + "_output_channels"],
-                                            kernel_shape=[kwargs[layer_num + "_kernel_shape_1"],
-                                                          kwargs[layer_num + "_kernel_shape_2"]],
-                                            pool_shape=[kwargs[layer_num + "_pool_shape"],
-                                                        kwargs[layer_num + "_pool_shape"]],
-                                            irange=kwargs[layer_num + "_irange"],
-                                            border_mode='valid',
-                                            include_prob=kwargs[layer_num + "_include_prob"],
-                                            init_bias=kwargs[layer_num + "_init_bias"],
-                                            W_lr_scale=kwargs[layer_num + "_W_lr_scale"],
-                                            b_lr_scale=kwargs[layer_num + "_b_lr_scale"],
-                                            max_kernel_norm=kwargs[layer_num + "_max_kernel_norm"],
-                                            pool_type='max',
-                                            tied_b=kwargs[layer_num + "_tied_b"],
-                                            kernel_stride=[kwargs[layer_num + "_kernel_stride_1"],
-                                                           kwargs[layer_num + "_kernel_stride_2"]],
-                                            monitor_style='classification')
-        elif kwargs[layer_num + "_conv_type"] == "ConvElemWise":
-            new_layer = ConvRectifiedLinear(layer_name=kwargs[layer_num + "_layer_name"],
-                                            output_channels=kwargs[layer_num + "_output_channels"],
-                                            kernel_shape=[kwargs[layer_num + "_kernel_shape_1"],
-                                                          kwargs[layer_num + "_kernel_shape_2"]],
-                                            pool_shape=[kwargs[layer_num + "_pool_shape"],
-                                                        kwargs[layer_num + "_pool_shape"]],
-                                            irange=kwargs[layer_num + "_irange"],
-                                            border_mode='valid',
-                                            include_prob=kwargs[layer_num + "_include_prob"],
-                                            init_bias=kwargs[layer_num + "_init_bias"],
-                                            W_lr_scale=kwargs[layer_num + "_W_lr_scale"],
-                                            b_lr_scale=kwargs[layer_num + "_b_lr_scale"],
-                                            max_kernel_norm=kwargs[layer_num + "_max_kernel_norm"],
-                                            pool_type='max',
-                                            tied_b=kwargs[layer_num + "_tied_b"],
-                                            kernel_stride=[kwargs[layer_num + "_kernel_stride_1"],
-                                                           kwargs[layer_num + "_kernel_stride_2"]],
-                                            monitor_style='classification',
-                                            nonlinearity=kwargs[layer_num + "_nonlinearity"])
-        layers.append(new_layer)
+    # for layer_num in range(1, 2):
+        # if kwargs[layer_num + "_conv_type"] == "ConvRectifiedLinear":
+    new_layer_1 = ConvRectifiedLinear(layer_name="l1",
+		    output_channels=8,
+		    kernel_shape=[4,4],
+		    pool_shape=[4,4],
+		    irange=.05,
+		    border_mode='valid',
+		    include_prob=.05,
+		    init_bias=0,
+		    W_lr_scale=.5,
+		    b_lr_scale=.01,
+		    max_kernel_norm=1.9,
+		    pool_type='max',
+		    tied_b=0,
+		    kernel_stride=[2,2],
+		    monitor_style='classification')
+    layers.append(new_layer_1)
+        # elif kwargs[layer_num + "_conv_type"] == "ConvElemWise":
+    new_layer_2 = ConvRectifiedLinear(layer_name='l2',
+		    output_channels=8,
+		    kernel_shape=[4,4],
+		    pool_shape=[4,4],
+		    irange=.05,
+		    border_mode='valid',
+		    include_prob=.05,
+		    init_bias=0.0,
+		    W_lr_scale=.5,
+		    b_lr_scale=.01,
+		    max_kernel_norm=1.9,
+		    pool_type='max',
+		    tied_b=0,
+		    kernel_stride=[2,2],
+		    monitor_style='classification',
+		    nonlinearity=buildNonlinearity('Rect'))
+    layers.append(new_layer_2)
     return layers
 
+def buildNonlinearity(nonlinearity):
+	if nonlinearity == 'Rect':
+		return RectifierConvNonlinearity()
+	elif nonlinearity == 'Sigmoid':
+		return SigmoidConvNonlinearity()
+	elif nonlinearity == 'Tanh':
+		return TanhConvNonlinearity()
 
-def buildAlgorithm(params, **kwargs):
+def buildAlgorithm():
     """
     This function is responsible for building an algorithm object. An algorithm consists of a few parameters,
     a monitoring dataset (which will be constant), a cost function (which for now will also be constant),
@@ -124,12 +129,12 @@ def buildAlgorithm(params, **kwargs):
         which_set='train',
         one_hot=1,
         start=50000,
-        stop=60000
+        stop=50500
     ),
                  'test': MNIST(
                      which_set='test',
                      one_hot=1,
-                     stop=10000
+                     stop=1000
                  )}
     cost = SumOfCosts(costs=[MethodCost(
         method='cost_from_X'
@@ -137,7 +142,7 @@ def buildAlgorithm(params, **kwargs):
         coeffs=[.00005, .00005, .00005]
     )])
 
-    termination_criterion = And(
+    terminatia_criteria = And(
         criteria=[MonitorBased(
             channel_name="valid_y_misclass",
             prop_decrease=0.50,
@@ -147,34 +152,34 @@ def buildAlgorithm(params, **kwargs):
                       max_epochs=kwargs["max_epochs"]
                   )])
 
-    algorithm = SGD(batch_size=kwargs["batch_size"],
-                    learning_rate=kwargs["learning_rate"],
-                    learning_rule=buildLearningRule(params, kwargs),
+    algorithm = SGD(batch_size=100,
+                    learning_rate=.05,
+                    learning_rule=buildLearningRule(params, **kwargs),
                     monitoring_dataset=m_dataset,
                     cost=cost,
-                    termination_criterion=termination_criterion)
+                    termination_criteria=termination_criteria)
     return algorithm
 
 
-def buildExtensions(params, **kwargs):
+def buildExtensions():
     extensions = []
     extensions.append(MonitorBasedSaveBest(
         channel_name='test_y_misclass',
         save_path="./convolutional_network_best.pkl"))
-    if kwargs["learning_rule"] == "Momemtum":
-        extensions.append(MomentumAdjustor(
-            start=1,
-            saturate=10,
-            final_momentum=.99
-        ))
+    # if kwargs["learning_rule"] == "Momemtum":
+        # extensions.append(MomentumAdjustor(
+            # start=1,
+            # saturate=10,
+            # final_momentum=.99
+        # ))
     return extensions
 
 
 def main(params, **kwargs):
-    train = Train(dataset=buildDataset(params, **kwargs),
-                  model=buildModel(params, **kwargs),
-                  algorithm=buildAlgorithm(params, **kwargs),
-                  extensions=buildExtensions(params, **kwargs))
+    train = Train(dataset=buildDataset(),
+                  model=buildModel(),
+                  algorithm=buildAlgorithm(),
+                  extensions=buildExtensions())
     train.main_loop()
 
     result = 0  # here we need to read the file from disk
