@@ -25,6 +25,7 @@ import os
 import sys
 import time
 import gc
+from random import randrange
 
 def main(params, **kwargs):
     train = open('./branin.yaml', 'r').read()
@@ -32,30 +33,31 @@ def main(params, **kwargs):
 					'valid_stop': 50500,
 					'test_stop': 10000,
 					'batch_size': 100,
-					'output_channels': params['output_channels'],
-					'irange': params['irange'],
-					'kernel_shape': params['kernel_shape'],
-					'pool_shape': params['pool_shape'],
-					'pool_stride': params['pool_stride'],
-					'max_kernel_norm': params['max_kernel_norm'],
-					'output_channels_2': params['output_channels_2'],
-					'irange_2': params['irange_2'],
-					'kernel_shape_2': params['kernel_shape_2'],
-					'pool_shape_2': params['pool_shape_2'],
-					'pool_stride_2': params['pool_stride_2'],
-					'max_kernel_norm_2': params['max_kernel_norm_2'],
-					'max_col_norm': params['max_col_norm'],
-					'learning_rate': params['learning_rate'],
-					'init_momentum': params['init_momentum'],
+					'output_channels': int(params['output_channels']),
+					'irange': float(params['irange']),
+					'kernel_shape': int(params['kernel_shape']),
+					'pool_shape': int(params['pool_shape']),
+					'pool_stride': int(params['pool_stride']),
+					'max_kernel_norm': float(params['max_kernel_norm']),
+					'output_channels_2': int(params['output_channels_2']),
+					'irange_2': float(params['irange_2']),
+					'kernel_shape_2': int(params['kernel_shape_2']),
+					'pool_shape_2': int(params['pool_shape_2']),
+					'pool_stride_2': int(params['pool_stride_2']),
+					'max_kernel_norm_2': float(params['max_kernel_norm_2']),
+					'max_col_norm': float(params['max_col_norm']),
+					'learning_rate': float(params['learning_rate']),
+					'init_momentum': float(params['init_momentum']),
 					'max_epochs': 500,
 					'save_path': '.'}
     train = train % (train_params)
+    train = yaml_parse.load(train) 
     train.main_loop()
     model = serial.load(os.path.join(d, f, 'best_model.pkl'))
     monitor = model.monitor
     channels = monitor.channels
     def read_channel(s):
-	return float(channels[s].val_record[-1])
+        return float(channels[s].val_record[-1])
 	#print 'job#, orig valid, valid both, new test, old test'
     v, t = map(read_channel, ['valid_y_misclass', 'test_y_misclass'])
     return t
