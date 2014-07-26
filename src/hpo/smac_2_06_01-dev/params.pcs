@@ -1,8 +1,8 @@
-train_stop {50000} [50000]i
-valid_stop {60000} [60000]i
-test_stop {10000} [10000]i
+train_stop [50000,50000] [50000]i
+valid_stop [60000,60000] [60000]i
+test_stop [10000,10000] [10000]i
 
-batch_size {100} [100]i
+batch_size [100,100] [100]i
 
 output_channels [2,128] [64]i
 kernel_shape [1,10] [5]i
