@@ -22,7 +22,7 @@
                  }, !obj:pylearn2.models.mlp.ConvRectifiedLinear {
                      layer_name: 'h3',
                      output_channels: %(output_channels_2)i,
-					 irange: %(irange_2)f,
+                     irange: %(irange_2)f,
                      kernel_shape: [%(kernel_shape_2)i, %(kernel_shape_2)i],
                      pool_shape: [%(pool_shape_2)i, %(pool_shape_2)i],
                      pool_stride: [%(pool_stride_2)i, %(pool_stride_2)i],
