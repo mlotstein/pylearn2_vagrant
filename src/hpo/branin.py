@@ -25,7 +25,9 @@ import os
 import sys
 import time
 import gc
+import pickle
 from random import randrange
+
 
 def main(params, **kwargs):
     train = open('./branin.yaml', 'r').read()
@@ -53,7 +55,10 @@ def main(params, **kwargs):
     train = train % (train_params)
     train = yaml_parse.load(train) 
     train.main_loop()
-    model = serial.load(os.path.join(d, f, 'best_model.pkl'))
+    #model = serial.load(os.path.join(d, f, 'best_model.pkl'))
+    
+    model = pickle.load(open('best_model.pkl', 'rb'))
+    
     monitor = model.monitor
     channels = monitor.channels
     def read_channel(s):
