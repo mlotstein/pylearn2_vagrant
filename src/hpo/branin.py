@@ -30,7 +30,7 @@ from random import randrange
 
 
 def main(params, **kwargs):
-    train = open('./branin.yaml', 'r').read()
+    train = open('/vagrant/src/hpo/branin.yaml', 'r').read()
     train_params = {'train_stop': 500,
 					'valid_stop': 50500,
 					'test_stop': 10000,
@@ -50,7 +50,7 @@ def main(params, **kwargs):
 					'max_col_norm': float(params['max_col_norm']),
 					'learning_rate': float(params['learning_rate']),
 					'init_momentum': float(params['init_momentum']),
-					'max_epochs': 500,
+					'max_epochs': 50,
 					'save_path': '.'}
     train = train % (train_params)
     train = yaml_parse.load(train) 
